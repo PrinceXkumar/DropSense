@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DropSense — Student Insights Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{
+            min-height:100vh;font-family:'Inter',system-ui,sans-serif;
+            background:#06081a;color:#e2e8f0;overflow-x:hidden;
+        }
+
+        /* ── Animated bg ── */
+        .bg-anim{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+        .orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.3;animation:drift 20s ease-in-out infinite alternate;}
+        .orb-1{width:500px;height:500px;background:#6366f1;top:-5%;left:-5%;}
+        .orb-2{width:400px;height:400px;background:#0ea5e9;bottom:-8%;right:-3%;animation-delay:-7s;}
+        .orb-3{width:300px;height:300px;background:#a855f7;top:50%;left:60%;animation-delay:-14s;}
+        @keyframes drift{0%{transform:translate(0,0) scale(1);}50%{transform:translate(30px,-25px) scale(1.06);}100%{transform:translate(-20px,40px) scale(.96);}}
+        .bg-grid{position:fixed;inset:0;z-index:0;opacity:.03;
+            background-image:linear-gradient(rgba(255,255,255,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.1) 1px,transparent 1px);
+            background-size:60px 60px;pointer-events:none;
+        }
+
+        .wrap{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:20px 20px 48px;}
+
+        /* ── Topbar ── */
+        .topbar{
+            display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;
+            padding:14px 22px;margin-bottom:20px;border-radius:18px;
+            background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+            backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+        }
+        .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;}
+        .brand-icon{
+            width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+            background:linear-gradient(135deg,#6366f1,#8b5cf6);
+            box-shadow:0 6px 16px rgba(99,102,241,.35);transition:all .3s;
+        }
+        .brand:hover .brand-icon{transform:scale(1.08) rotate(-3deg);box-shadow:0 8px 24px rgba(99,102,241,.5);}
+        .brand-icon svg{width:22px;height:22px;color:#fff;}
+        .brand-text h1{font-size:18px;font-weight:800;color:#f1f5f9;letter-spacing:-.02em;}
+        .brand-text p{font-size:11px;color:#64748b;margin-top:1px;}
+
+        .nav-links{display:flex;gap:6px;flex-wrap:wrap;}
+        .nav-links a{
+            font-size:13px;font-weight:600;color:#94a3b8;text-decoration:none;
+            padding:9px 16px;border-radius:12px;
+            background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);
+            transition:all .25s;position:relative;overflow:hidden;
+        }
+        .nav-links a::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.1));opacity:0;transition:opacity .25s;}
+        .nav-links a:hover{color:#fff;border-color:rgba(99,102,241,.3);transform:translateY(-1px);}
+        .nav-links a:hover::before{opacity:1;}
+        .nav-links a.active{color:#fff;background:rgba(99,102,241,.2);border-color:rgba(99,102,241,.4);}
+        .nav-links a span{position:relative;z-index:1;}
+
+        .user-area{display:flex;align-items:center;gap:10px;}
+        .user-pill{
+            display:flex;align-items:center;gap:10px;padding:6px 14px 6px 6px;
+            background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+            border-radius:999px;transition:all .25s;
+        }
+        .user-pill:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.18);}
+        .avatar{
+            width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;
+            font-size:12px;font-weight:800;color:#fff;
+            background:linear-gradient(145deg,#6366f1,#a855f7);
+        }
+        .user-pill .name{font-size:13px;font-weight:600;color:#e2e8f0;}
+        .user-pill .role{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.04em;}
+
+        .btn-logout{
+            display:inline-flex;align-items:center;gap:6px;
+            padding:9px 18px;font-family:inherit;font-size:13px;font-weight:600;
+            color:#f87171;background:rgba(239,68,68,.1);
+            border:1px solid rgba(239,68,68,.2);border-radius:12px;cursor:pointer;
+            transition:all .25s;
+        }
+        .btn-logout:hover{background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.4);transform:translateY(-1px);box-shadow:0 4px 12px rgba(239,68,68,.2);}
+        .btn-logout svg{width:14px;height:14px;}
+
+        /* ── Stats row ── */
+        .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+        @media(max-width:800px){.stats-row{grid-template-columns:repeat(2,1fr);}}
+        .stat-card{
+            padding:18px 20px;border-radius:16px;
+            background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+            backdrop-filter:blur(10px);transition:all .3s;position:relative;overflow:hidden;
+        }
+        .stat-card::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;border-radius:50%;filter:blur(40px);opacity:.2;}
+        .stat-card:nth-child(1)::before{background:#6366f1;}
+        .stat-card:nth-child(2)::before{background:#22c55e;}
+        .stat-card:nth-child(3)::before{background:#f59e0b;}
+        .stat-card:nth-child(4)::before{background:#ef4444;}
+        .stat-card:hover{border-color:rgba(255,255,255,.15);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+        .stat-card .s-label{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+        .stat-card .s-value{font-size:1.5rem;font-weight:800;color:#f1f5f9;letter-spacing:-.02em;}
+        .stat-card .s-sub{font-size:12px;color:#64748b;margin-top:4px;}
+
+        /* ── Main card ── */
+        .card{
+            border-radius:20px;overflow:hidden;
+            background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+            backdrop-filter:blur(20px);
+            box-shadow:0 20px 60px -20px rgba(0,0,0,.5);
+        }
+        .card-header{
+            padding:20px 24px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;
+            border-bottom:1px solid rgba(255,255,255,.06);
+            background:rgba(255,255,255,.02);
+        }
+        .card-header h2{font-size:18px;font-weight:800;color:#f1f5f9;letter-spacing:-.02em;}
+        .card-header .hint{font-size:12px;color:#64748b;margin-top:2px;}
+        .header-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+        .count-badge{
+            font-size:12px;font-weight:700;color:#a5b4fc;
+            padding:6px 14px;border-radius:999px;
+            background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.25);
+        }
+        .btn-analytics{
+            display:inline-flex;align-items:center;gap:6px;
+            font-size:12px;font-weight:700;color:#fff;
+            padding:8px 18px;border-radius:12px;text-decoration:none;
+            background:linear-gradient(135deg,#6366f1,#8b5cf6);
+            box-shadow:0 4px 12px rgba(99,102,241,.3);
+            transition:all .25s;
+        }
+        .btn-analytics:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(99,102,241,.45);}
+
+        /* ── Filters ── */
+        .filter-bar{
+            padding:14px 24px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+            border-bottom:1px solid rgba(255,255,255,.06);
+            background:rgba(255,255,255,.02);
+        }
+        .filter-bar input,.filter-bar select{
+            padding:10px 16px;font-size:13px;font-family:inherit;
+            background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+            border-radius:12px;color:#e2e8f0;transition:all .25s;
+        }
+        .filter-bar input{flex:1;min-width:200px;}
+        .filter-bar input::placeholder{color:#4a5568;}
+        .filter-bar input:focus,.filter-bar select:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+        .filter-bar select{cursor:pointer;}
+        .filter-bar select option{background:#1e293b;color:#e2e8f0;}
+        .btn-filter{
+            padding:10px 22px;font-size:13px;font-weight:700;font-family:inherit;
+            color:#fff;background:linear-gradient(135deg,#6366f1,#8b5cf6);
+            border:none;border-radius:12px;cursor:pointer;
+            transition:all .25s;
+        }
+        .btn-filter:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(99,102,241,.35);}
+        .btn-clear{font-size:12px;color:#64748b;text-decoration:none;padding:10px 14px;transition:color .2s;}
+        .btn-clear:hover{color:#f87171;}
+
+        /* ── Table ── */
+        .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+        table{width:100%;min-width:820px;border-collapse:collapse;font-size:14px;}
+        thead th{
+            text-align:left;padding:14px 18px;font-size:11px;font-weight:700;
+            letter-spacing:.06em;text-transform:uppercase;color:#64748b;
+            background:rgba(255,255,255,.02);border-bottom:1px solid rgba(255,255,255,.06);
+            white-space:nowrap;
+        }
+        tbody td{
+            padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.04);
+            color:#cbd5e1;vertical-align:middle;
+        }
+        tbody tr{transition:all .2s;}
+        tbody tr:hover{background:rgba(99,102,241,.06);}
+        tbody tr:hover td{color:#f1f5f9;}
+
+        .id-link{
+            display:inline-flex;align-items:center;gap:6px;font-weight:700;
+            color:#818cf8;text-decoration:none;transition:all .25s;
+            padding:4px 10px;border-radius:8px;
+        }
+        .id-link:hover{color:#a5b4fc;background:rgba(99,102,241,.15);transform:translateX(2px);}
+        .id-link svg{width:14px;height:14px;opacity:.7;transition:transform .2s;}
+        .id-link:hover svg{transform:translateX(3px);opacity:1;}
+
+        .badge{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;transition:all .2s;}
+        .badge:hover{transform:scale(1.05);}
+        .badge-green{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.2);}
+        .badge-red{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.2);}
+        .badge-blue{background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.2);}
+        .badge-yellow{background:rgba(234,179,8,.15);color:#fbbf24;border:1px solid rgba(234,179,8,.2);}
+        .badge-neutral{background:rgba(255,255,255,.06);color:#64748b;border:1px solid rgba(255,255,255,.08);}
+
+        .empty{padding:60px 28px;text-align:center;color:#64748b;font-size:14px;line-height:1.7;}
+        .empty code{font-size:12px;background:rgba(255,255,255,.06);padding:3px 10px;border-radius:8px;color:#a5b4fc;}
+
+        /* ── Pagination ── */
+        .pagination{
+            display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;
+            padding:18px 24px;border-top:1px solid rgba(255,255,255,.06);
+            background:rgba(255,255,255,.02);
+        }
+        .pagination a{
+            display:inline-flex;align-items:center;padding:9px 18px;
+            font-size:13px;font-weight:700;color:#a5b4fc;text-decoration:none;
+            border-radius:12px;border:1px solid rgba(99,102,241,.2);
+            background:rgba(99,102,241,.08);transition:all .25s;
+        }
+        .pagination a:hover{background:rgba(99,102,241,.2);border-color:rgba(99,102,241,.4);transform:translateY(-1px);}
+        .pagination .current{padding:9px 18px;font-size:13px;font-weight:600;color:#64748b;}
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}}
+        .animate-in{animation:fadeUp .5s cubic-bezier(.16,1,.3,1) both;}
+        .delay-1{animation-delay:.1s;}.delay-2{animation-delay:.15s;}.delay-3{animation-delay:.2s;}.delay-4{animation-delay:.25s;}
+    </style>
+</head>
+<body>
+<div class="bg-anim" aria-hidden="true"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+<div class="bg-grid" aria-hidden="true"></div>
+
+<div class="wrap">
+    <header class="topbar animate-in">
+        <a class="brand" href="{% url 'students:home' %}">
+            <div class="brand-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="brand-text"><h1>DropSense</h1><p>Student Insight Engine</p></div>
+        </a>
+        <div class="nav-links">
+            <a href="{% url 'students:home' %}"><span>🏠 Home</span></a>
+            <a href="{% url 'students:student_list' %}" class="active"><span>👥 Students</span></a>
+            <a href="{% url 'students:analytics' %}"><span>📊 Analytics</span></a>
+            <a href="/admin/" target="_blank"><span>⚙️ Admin</span></a>
+        </div>
+        <div class="user-area">
+            {% if user.is_authenticated %}
+            <div class="user-pill">
+                <span class="avatar">{{ user.username|slice:":2"|upper }}</span>
+                <div><div class="name">{{ user.username }}</div>
+                <div class="role">{% if user.is_superuser or user.role == 'admin' %}Administrator{% elif user.role == 'mentor' %}Mentor{% elif user.role == 'parent' %}Parent{% else %}User{% endif %}</div></div>
+            </div>
+            <form method="post" action="{% url 'accounts:logout' %}" style="margin:0;">{% csrf_token %}
+                <button type="submit" class="btn-logout"><svg viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Logout</button>
+            </form>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card animate-in delay-1"><div class="s-label">Total Students</div><div class="s-value">{{ page_obj.paginator.count }}</div><div class="s-sub">Across all records</div></div>
+        <div class="stat-card animate-in delay-2"><div class="s-label">Showing</div><div class="s-value">{{ page_obj|length }}</div><div class="s-sub">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div></div>
+        <div class="stat-card animate-in delay-3"><div class="s-label">Filters Active</div><div class="s-value">{% if search or risk_filter or target_filter %}Yes{% else %}None{% endif %}</div><div class="s-sub">{% if search %}Search: "{{ search }}"{% elif risk_filter %}Risk: {{ risk_filter }}{% elif target_filter %}Status: {{ target_filter }}{% else %}Showing all data{% endif %}</div></div>
+        <div class="stat-card animate-in delay-4"><div class="s-label">Quick Action</div><div class="s-value" style="font-size:1rem;"><a href="{% url 'students:analytics' %}" style="color:#a5b4fc;text-decoration:none;">View Analytics →</a></div><div class="s-sub">Charts & insights</div></div>
+    </div>
+
+    <main class="card animate-in delay-2">
+        <div class="card-header">
+            <div><h2>Student Records</h2><p class="hint">Click any student ID to view full profile & risk report</p></div>
+            <div class="header-actions">
+                {% if page_obj.paginator.count %}<span class="count-badge">{{ page_obj.paginator.count }} records</span>{% endif %}
+                <a href="{% url 'students:analytics' %}" class="btn-analytics">📊 Analytics Dashboard</a>
+            </div>
+        </div>
+
+        <form method="get" class="filter-bar">
+            <input type="text" name="q" value="{{ search }}" placeholder="🔍 Search by ID, course, nationality…">
+            <select name="risk">
+                <option value="">⚡ All Risk</option>
+                <option value="low"{% if risk_filter == "low" %} selected{% endif %}>🟢 Low Risk</option>
+                <option value="medium"{% if risk_filter == "medium" %} selected{% endif %}>🟡 Medium Risk</option>
+                <option value="high"{% if risk_filter == "high" %} selected{% endif %}>🔴 High Risk</option>
+            </select>
+            <select name="target">
+                <option value="">📋 All Status</option>
+                <option value="Dropout"{% if target_filter == "Dropout" %} selected{% endif %}>❌ Dropout</option>
+                <option value="Graduate"{% if target_filter == "Graduate" %} selected{% endif %}>🎓 Graduate</option>
+                <option value="Enrolled"{% if target_filter == "Enrolled" %} selected{% endif %}>📚 Enrolled</option>
+            </select>
+            <button type="submit" class="btn-filter">Apply Filters</button>
+            {% if search or risk_filter or target_filter %}<a href="{% url 'students:student_list' %}" class="btn-clear">✕ Clear all</a>{% endif %}
+        </form>
+
+        {% if page_obj.object_list %}
+        <div class="table-scroll">
+            <table>
+                <thead><tr>
+                    <th>ID</th><th>Course</th><th>Gender</th><th>Age</th>
+                    <th>Risk Level</th><th>Status</th><th>Scholarship</th><th>Fees</th>
+                </tr></thead>
+                <tbody>
+                {% for student in page_obj.object_list %}
+                <tr>
+                    <td><a class="id-link" href="{% url 'students:student_detail' student.pk %}">#{{ student.id }}<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></td>
+                    <td>{{ student.course }}</td>
+                    <td>{{ student.gender }}</td>
+                    <td>{{ student.age_at_enrollment }}</td>
+                    <td>{% if student.risk.risk_level == "High" %}<span class="badge badge-red">🔴 High · {{ student.risk.risk_score }}%</span>{% elif student.risk.risk_level == "Medium" %}<span class="badge badge-yellow">🟡 Med · {{ student.risk.risk_score }}%</span>{% else %}<span class="badge badge-green">🟢 Low · {{ student.risk.risk_score }}%</span>{% endif %}</td>
+                    <td>{% if student.target == "Dropout" %}<span class="badge badge-red">Dropout</span>{% elif student.target == "Graduate" %}<span class="badge badge-green">Graduate</span>{% elif student.target == "Enrolled" %}<span class="badge badge-blue">Enrolled</span>{% else %}<span class="badge badge-neutral">—</span>{% endif %}</td>
+                    <td>{% if student.scholarship_holder %}<span class="badge badge-blue">Yes</span>{% else %}<span class="badge badge-neutral">No</span>{% endif %}</td>
+                    <td>{% if student.tuition_fees_up_to_date %}<span class="badge badge-green">✓ Paid</span>{% else %}<span class="badge badge-red">✗ Due</span>{% endif %}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty"><p><strong>No students found.</strong></p><p>Place <code>student_dataset.xlsx</code> in the project root, then run:</p><p><code>python manage.py import_students</code></p></div>
+        {% endif %}
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="pagination" aria-label="Pagination">
+            {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if search %}&q={{ search }}{% endif %}{% if risk_filter %}&risk={{ risk_filter }}{% endif %}{% if target_filter %}&target={{ target_filter }}{% endif %}">← Previous</a>{% endif %}
+            <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if search %}&q={{ search }}{% endif %}{% if risk_filter %}&risk={{ risk_filter }}{% endif %}{% if target_filter %}&target={{ target_filter }}{% endif %}">Next →</a>{% endif %}
+        </nav>
+        {% endif %}
+    </main>
+</div>
+</body>
+</html>

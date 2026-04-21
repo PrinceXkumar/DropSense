@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Create Account — DropSense</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{
+            min-height:100vh;font-family:'Inter',system-ui,sans-serif;
+            background:#06081a;color:#e2e8f0;overflow-x:hidden;
+            display:flex;align-items:center;justify-content:center;
+            padding: 40px 20px;
+        }
+
+        /* ── Animated bg ── */
+        .bg-anim{position:fixed;inset:0;z-index:0;overflow:hidden;}
+        .bg-anim .orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.35;animation:float 18s ease-in-out infinite alternate;}
+        .orb-1{width:600px;height:600px;background:#6366f1;top:-10%;left:-8%;animation-delay:0s;}
+        .orb-2{width:500px;height:500px;background:#0ea5e9;bottom:-12%;right:-6%;animation-delay:-6s;}
+        .orb-3{width:350px;height:350px;background:#a855f7;top:40%;left:50%;animation-delay:-12s;}
+        @keyframes float{
+            0%{transform:translate(0,0) scale(1);}
+            33%{transform:translate(40px,-30px) scale(1.08);}
+            66%{transform:translate(-20px,50px) scale(.95);}
+            100%{transform:translate(30px,-20px) scale(1.03);}
+        }
+        .bg-noise{position:fixed;inset:0;z-index:1;opacity:.04;
+            background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* ── Shell ── */
+        .shell{
+            position:relative;z-index:2;width:95%;max-width:1160px;
+            display:grid;grid-template-columns:1fr 1fr;
+            border-radius:32px;overflow:hidden;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.08);
+            backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);
+            box-shadow:0 40px 100px -20px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.03) inset;
+            animation:slideUp .8s cubic-bezier(.16,1,.3,1) both;
+        }
+        @keyframes slideUp{from{opacity:0;transform:translateY(60px);}}
+        @media(max-width:960px){
+            .shell{grid-template-columns:1fr;max-width:520px;}
+            .brand-side{padding:48px 40px 32px!important;min-height:auto!important;}
+        }
+
+        /* ── Left side ── */
+        .brand-side{
+            padding:72px 64px;display:flex;flex-direction:column;justify-content:center;
+            min-height:720px;position:relative;overflow:hidden;
+            background:linear-gradient(165deg,rgba(99,102,241,.18),rgba(14,165,233,.1),transparent);
+        }
+        .brand-badge{
+            display:inline-flex;align-items:center;gap:12px;
+            padding:10px 20px;border-radius:999px;
+            background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.3);
+            font-size:11px;font-weight:800;color:#a5b4fc;letter-spacing:.1em;text-transform:uppercase;
+            margin-bottom:32px;width:fit-content;
+            animation:fadeIn .6s .2s both;
+        }
+        @keyframes fadeIn{from{opacity:0;transform:translateY(15px);}}
+        .brand-side h1{
+            font-size:clamp(32px,4.5vw,48px);font-weight:900;line-height:1.05;
+            letter-spacing:-.04em;margin-bottom:20px;
+            background:linear-gradient(135deg,#fff 0%,#c7d2fe 50%,#818cf8 100%);
+            -webkit-background-clip:text;background-clip:text;
+            -webkit-text-fill-color:transparent;
+            animation:fadeIn .6s .3s both;
+        }
+        .brand-side .lead{
+            font-size:16px;line-height:1.6;color:#94a3b8;max-width:420px;margin-bottom:48px;
+            animation:fadeIn .6s .4s both;
+        }
+        .features{list-style:none;display:flex;flex-direction:column;gap:18px;animation:fadeIn .6s .5s both;}
+        .features li{
+            display:flex;align-items:center;gap:16px;font-size:15px;color:#cbd5e1;
+            padding:16px 20px;border-radius:18px;
+            background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);
+            transition:all .3s ease;
+        }
+        .features li:hover{background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.2);transform:translateX(8px);}
+        .features .ico{
+            width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+            font-size:18px;flex-shrink:0;background:rgba(99,102,241,.2);
+        }
+
+        /* ── Right side ── */
+        .form-side{
+            padding:72px 64px;display:flex;flex-direction:column;justify-content:center;
+            background:rgba(255,255,255,.015);
+        }
+        .form-header{margin-bottom:40px;animation:fadeIn .6s .3s both;}
+        .form-header h2{font-size:30px;font-weight:900;color:#fff;letter-spacing:-.03em;margin-bottom:8px;}
+        .form-header p{font-size:15px;color:#64748b;}
+
+        .field{margin-bottom:24px;animation:fadeIn .6s .4s both;}
+        .field label{display:block;font-size:11px;font-weight:800;color:#cbd5e1;margin-bottom:10px;letter-spacing:.08em;text-transform:uppercase;}
+        .input-wrap input, .input-wrap select{
+            width:100%;padding:16px 20px;font-size:15px;font-family:inherit;
+            background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.2);
+            border-radius:16px;color:#fff;
+            transition:all .25s ease;
+        }
+        .input-wrap select{
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 20px center;
+            background-size: 18px;
+            cursor: pointer;
+        }
+        .input-wrap input:focus, .input-wrap select:focus{outline:none;border-color:#6366f1;background:rgba(99,102,241,.08);box-shadow:0 0 0 4px rgba(99,102,241,.15);}
+        .input-wrap input::placeholder{color:rgba(255,255,255,0.2);}
+        
+        .errorlist{list-style:none;padding:0;margin:10px 0 0;font-size:12px;color:#f87171;font-weight:600;}
+        .helptext{display:block;font-size:11px;color:#475569;margin-top:8px;font-weight:500;}
+
+        .btn-signup{
+            width:100%;margin-top:24px;padding:18px 24px;font-size:16px;font-weight:800;font-family:inherit;
+            color:#fff;border:none;border-radius:18px;cursor:pointer;
+            background:linear-gradient(135deg,#6366f1,#8b5cf6,#a855f7);
+            box-shadow:0 12px 32px rgba(99,102,241,.4),0 0 0 1px rgba(99,102,241,.2) inset;
+            transition:all .3s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden;
+            animation:fadeIn .6s .5s both;
+        }
+        .btn-signup::before{
+            content:'';position:absolute;inset:0;
+            background:linear-gradient(135deg,transparent,rgba(255,255,255,0.2),transparent);
+            transform:translateX(-100%);transition:transform .6s;
+        }
+        .btn-signup:hover{transform:translateY(-3px);box-shadow:0 20px 48px rgba(99,102,241,.55),0 0 0 1px rgba(99,102,241,.3) inset;}
+        .btn-signup:hover::before{transform:translateX(100%);}
+        .btn-signup:active{transform:translateY(-1px);}
+
+        .login-link{
+            margin-top:32px;text-align:center;font-size:15px;color:#64748b;
+            animation:fadeIn .6s .6s both;
+        }
+        .login-link a{color:#a5b4fc;text-decoration:none;font-weight:700;transition:all .2s;border-bottom:1px solid transparent;}
+        .login-link a:hover{color:#fff;border-color:#fff;}
+    </style>
+</head>
+<body>
+<div class="bg-anim" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+<div class="bg-noise" aria-hidden="true"></div>
+
+<div class="shell">
+    <aside class="brand-side">
+        <div class="brand-badge">DropSense &mdash; Join the Network</div>
+        <h1>Elevate Student Success.</h1>
+        <p class="lead">Register to access professional-grade dropout risk analytics, real-time alerts, and collaborative student tracking tools.</p>
+        <ul class="features">
+            <li><span class="ico">📊</span><span>Full Student Lifecycle View</span></li>
+            <li><span class="ico">🤖</span><span>AI-Driven Risk Predictions</span></li>
+            <li><span class="ico">🛡️</span><span>Secure Role-Based Data Access</span></li>
+        </ul>
+    </aside>
+
+    <div class="form-side">
+        <div class="form-header">
+            <h2>Account Details ✨</h2>
+            <p>Begin your journey by creating an account.</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <h3 style="font-size:12px; font-weight:900; color:#6366f1; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+                <span style="width:24px; height:24px; border-radius:6px; background:rgba(99,102,241,0.1); display:flex; align-items:center; justify-content:center; font-size:12px;">👤</span>
+                Profile Information
+            </h3>
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                <div class="field">
+                    <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+                    <div class="input-wrap">{{ form.first_name }}</div>
+                </div>
+                <div class="field">
+                    <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+                    <div class="input-wrap">{{ form.last_name }}</div>
+                </div>
+            </div>
+            
+            <div class="field">
+                <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                <div class="input-wrap">{{ form.email }}</div>
+            </div>
+            
+            <div class="field">
+                <label for="{{ form.role.id_for_label }}">{{ form.role.label }}</label>
+                <div class="input-wrap">{{ form.role }}</div>
+            </div>
+
+            <h3 style="font-size:12px; font-weight:900; color:#6366f1; text-transform:uppercase; letter-spacing:0.1em; margin-top:32px; margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+                <span style="width:24px; height:24px; border-radius:6px; background:rgba(99,102,241,0.1); display:flex; align-items:center; justify-content:center; font-size:12px;">🔐</span>
+                Account Security
+            </h3>
+
+            <div class="field">
+                <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+                <div class="input-wrap">{{ form.username }}</div>
+                {% if form.username.errors %}<ul class="errorlist">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                <div class="field">
+                    <label for="{{ form.password1.id_for_label }}">Password</label>
+                    <div class="input-wrap">{{ form.password1 }}</div>
+                </div>
+                <div class="field">
+                    <label for="{{ form.password2.id_for_label }}">Confirm</label>
+                    <div class="input-wrap">{{ form.password2 }}</div>
+                </div>
+            </div>
+            {% if form.password1.errors or form.password2.errors %}
+                <ul class="errorlist" style="margin-top:-10px; margin-bottom:20px;">
+                    {% for e in form.password1.errors %}<li>{{ e }}</li>{% endfor %}
+                    {% for e in form.password2.errors %}<li>{{ e }}</li>{% endfor %}
+                </ul>
+            {% endif %}
+            
+            <button type="submit" class="btn-signup">Create My Account →</button>
+        </form>
+        
+        <p class="login-link">Already a member? <a href="{% url 'accounts:login' %}">Sign in here</a></p>
+    </div>
+</div>
+</body>
+</html>
