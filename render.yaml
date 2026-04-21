@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: dropsense
+    env: python
+    buildCommand: "./dropout/build.sh"
+    startCommand: "cd dropout && gunicorn dropout_project.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.11
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: "*"
