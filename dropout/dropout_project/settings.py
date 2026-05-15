@@ -33,6 +33,14 @@ DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
+# Vercel specific setting for forms over HTTPS
+VERCEL_URL = os.environ.get('VERCEL_URL')
+if VERCEL_URL:
+    if VERCEL_URL not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(VERCEL_URL)
+        ALLOWED_HOSTS.append(f'.{VERCEL_URL}')
+    CSRF_TRUSTED_ORIGINS = [f'https://{VERCEL_URL}', f'https://*.{VERCEL_URL}']
+
 
 # Application definition
 
